@@ -1,19 +1,27 @@
 {
-  "name": "timetrackerapi",
-  "version": "1.0.0",
-  "description": "Prueba back-end Qrvy",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/sjbarrientos/Timetracker.git"
-  },
-  "author": "Sjbarrientos",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/sjbarrientos/Timetracker/issues"
-  },
-  "homepage": "https://github.com/sjbarrientos/Timetracker#readme"
+    "name": "timetrackerapi",
+    "version": "1.0.0",
+    "description": "Test back-end Qrvy",
+    "main": "index.js",
+    "scripts": {
+        "start": "node server/server.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sjbarrientos/Timetracker.git"
+    },
+    "author": "Sjbarrientos",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/sjbarrientos/Timetracker/issues"
+    },
+    "homepage": "https://github.com/sjbarrientos/Timetracker#readme",
+    "dependencies": {
+        "body-parser": "^1.19.0",
+        "express": "^4.17.1",
+        "mongoose": "^5.6.13",
+        "mongoose-unique-validator": "^2.0.3",
+        "underscore": "^1.9.1"
+    }
 }
