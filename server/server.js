@@ -8,14 +8,16 @@ const mongoose = require('mongoose');
 
 //Configure Express
 const app = express();
-// Create application/json parser
-const jsonParser = bodyParser.json();
-// Create application/x-www-form-urlencoded parser
-var urlencodedParser = bodyParser.urlencoded({ extended: false });
-//  Define public path
+//parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+//parse application/json
+app.use(bodyParser.json());
+
+//Define public path
 app.use(express.static(__dirname + '/public'))
-    //Import routes
-app.use(require('./routes/index.js'));
+
+//Import routes
+app.use(require('./routes/index'));
 
 //Conect to Mongo DB
 mongoose.connect(process.env.DBString, { useNewUrlParser: true, useCreateIndex: true }, (err, res) => {

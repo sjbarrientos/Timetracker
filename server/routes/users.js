@@ -1,54 +1,117 @@
 const express = require('express');
+const _ = require('underscore');
+const httpStatus = require('http-status-codes');
+
+const User = require('../models/user');
+
 const app = express();
 
 
 /**
- * @api {get} api/user/:id Request a list of users 
- * @apiVersion 0.3.0
- * @apiName GetUser
+ * @api {get} /users Request a list of users 
+ * @apiVersion 1.0.0
  * @apiGroup User
- * @apiPermission admin
  *
- * @apiDescription Compare Verison 0.3.0 with 0.2.0 and you will see the green markers with new items in version 0.3.0 and red markers with removed items since 0.2.0.
+ * @apiDescription Get a list of users in the application
  *
- * @apiParam {String} id The Users-ID.
- *
- * @apiExample Example usage:
- * {
- *  s:s
- * }
- * 
- *
- * @apiSuccess {String}   id            The Users-ID.
- * @apiSuccess {Date}     registered    Registration Date.
- * @apiSuccess {Date}     name          Fullname of the User.
- * @apiSuccess {String[]} nicknames     List of Users nicknames (Array of Strings).
- * @apiSuccess {Object}   profile       Profile data (example for an Object)
- * @apiSuccess {Number}   profile.age   Users age.
- * @apiSuccess {String}   profile.image Avatar-Image.
- * @apiSuccess {Object[]} options       List of Users options (Array of Objects).
- * @apiSuccess {String}   options.name  Option Name.
- * @apiSuccess {String}   options.value Option Value.
+ * @apiSuccess {Boolean}   ok               status
+ * @apiSuccess {Object[]}  users            users in the app
+ * @apiSuccess {String}    users.username   username.
+ * @apiSuccess {String}    users.email      email.
  * 
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "firstname": "John",
- *       "lastname": "Doe"
+ *       "ok": true,
+ *       "users": "Doe"
  *     }
  *
- * @apiError NoAccessRight Only authenticated Admins can access the data.
- * @apiError UserNotFound   The <code>id</code> of the User was not found.
- *
+ * 
+ * @apiError (Error 5XX) ConnectionFail The API couldn't connect to DB. 
  * @apiErrorExample Response (example):
- *     HTTP/1.1 401 Not Authenticated
+ *     HTTP/1.1 500 Internal Server Error
  *     {
- *       "error": "NoAccessRight"
+ *          "ok": false,
+ *          "err": "ConnectionFail"
  *     }
  */
-app.get('/api/user/', (req, res) => res.send('Hello World!'));
-//add user
-app.post('/api/user/add/', (req, res) => res.send('Hello World!'));
+app.get('/api/users', (req, res) => {
+    User.find({})
+        .exec((err, users) => {
+            if (err) {
+                return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+                    ok: false,
+                    err: 'ConnectionFail'
+                })
+            }
+            res.json({
+                ok: true,
+                users
+            })
+        });
+
+});
+
+/**
+ * @api {post} /users/add Insert user 
+ * @apiVersion 1.0.0
+ * @apiGroup User
+ *
+ * @apiDescription Create a new user
+ * 
+ * @apiParam {String} username  user's username.
+ * @apiParam {String} email     user's email.
+ *
+ * @apiSuccess {Boolean}   ok               status
+ * @apiSuccess {Object}    users            users object
+ * @apiSuccess {String}    users.username   username.
+ * @apiSuccess {String}    users.email      email.
+ * 
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *          "ok":true,
+ *          "user":{
+ *              "_id":"5d74326a00286d1957c913a0",
+ *              "username":"username",
+ *              "email":"email",
+ *              "__v":0
+ *          }
+ *     }
+ *
+ * 
+ * @apiError (Error 4XX) ValidationError  
+ * @apiErrorExample Response (example):
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *          "ok":false,
+ *          "err":"ValidationError",
+ *          "message":"User validation failed: username: username is required, email: email is required"
+ *     }
+ */
+app.post('/api/users/add', (req, res) => {
+    let body = req.body;
+   
+    let user = new User({
+        username: body.username,
+        email: body.email
+    });
+    user.save((err, userBD) => {
+        if (err)
+            return res.status(httpStatus.BAD_REQUEST).json({
+                ok: false,
+                err:err.name,
+                message:err.message
+            });
+        res.json({
+            ok:true,
+            user:userBD
+        });
+    });
+
+
+
+});
 //get user tasks
 app.get('/api/user/task/:id', (req, res) => res.send('Hello World!'));
 
