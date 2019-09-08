@@ -26,6 +26,8 @@ mongoose.connect(process.env.DBString, { useNewUrlParser: true, useCreateIndex: 
     console.log('Database connected susscessfuly');
 
 });
-
+// require('./models/status');
+// require('./models/user');
+// require('./models/task');
 //Start server
 app.listen(process.env.PORT, () => console.log(`Time Tracker Api running at port ${process.env.PORT}`));

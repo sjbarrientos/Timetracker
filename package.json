@@ -3,8 +3,9 @@
     "version": "1.0.0",
     "description": "Test back-end Qrvy",
     "apidoc": {
-        "title": "time Tracker API",
-        "url": "https://timetrackersj.herokuapp.com/"
+        "name": "Time Tracker API",
+        "title": "Time Tracker API",
+        "url": "https://timetrackersj.herokuapp.com"
     },
     "main": "index.js",
     "scripts": {

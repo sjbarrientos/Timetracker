@@ -6,15 +6,15 @@
  let userSchema= new Schema({
      username:{
          type:String,
-         required:[true,'username is required']
+         required:[true,'{PATH} is required']
      },
      email:{
          type: String,
          unique:true,
-         required:[true,'email is required']
+         required:[true,'{PATH} is required']
      }
  });
 
  userSchema.plugin(uniqueValidator,{message: '{PATH} can\'t be duplicated'})
 
- module.exports=mongoose.model('User',userSchema);
+ module.exports=mongoose.model('user',userSchema);
