@@ -17,6 +17,7 @@ const app = express();
  *
  * @apiSuccess {Boolean}   ok               status
  * @apiSuccess {Object[]}  users            users in the app
+ * @apiSuccess {String}    users._id        user's id.
  * @apiSuccess {String}    users.username   user's username.
  * @apiSuccess {String}    users.email      user's email.
  * 
@@ -26,9 +27,9 @@ const app = express();
  *          "ok":true,
  *          "users":[
  *              {
- *                  "_id":"id",
- *                  "username":"username",
- *                  "email":"email"
+ *                  "_id":"5d75351c24d7433e90fa23e1",
+ *                  "username":"sj2",
+ *                  "email":"sj2@gmail.com"
  *              }
  *          ]
  *     }
@@ -81,14 +82,14 @@ app.get('/api/users', async (req, res) => {
  *     {
  *          "ok":true,
  *          "user":{
- *              "_id":"id",
- *              "username":"username",
- *              "email":"email"
+ *              "_id":"5d75351c24d7433e90fa23e1",
+ *              "username":"sj2",
+ *              "email":"sj2@gmail.com"
  *          }
  *     }
  *
  * 
- * @apiError (Error 4XX) ValidationError  
+ * @apiError (Error 4XX) ValidationError  Error with all validation messages
  * @apiErrorExample Response (example):
  *     HTTP/1.1 400 Bad Request
  *     {
@@ -108,7 +109,7 @@ app.post('/api/users/add', async (req, res) => {
         let userDB = await user.save();
         return res.json({
             ok: true,
-            user: userBD
+            user: userDB
         });
     } catch (err) {
         return res.status(httpStatus.BAD_REQUEST).json({
@@ -119,24 +120,30 @@ app.post('/api/users/add', async (req, res) => {
     }
 });
 /**
- * @api {get} /api/users/tasks/:id Required task's user 
+ * @api {get} /api/users/tasks/:id request user's tasks
  * @apiVersion 1.0.0
  * @apiGroup User
  *
- * @apiDescription Required task's user 
+ * @apiDescription This method returns and object with all tasks for the user send by parameters
  * 
- * @apiParam {String} id  user's id.
+ * @apiParam {String} id    User ID.
  *
- @apiSuccess {Boolean}   ok                    status
+ * @apiSuccess {Boolean}   ok                    status
  * @apiSuccess {Object}    task                  task
+ * @apiSuccess {Numeric}   task.current_time     task's curent time.
+ * @apiSuccess {Date}      task.startDate        task's start date.
  * @apiSuccess {String}    task._id              task's id.
  * @apiSuccess {String}    task.name             task' name.
- * @apiSuccess {String}    task.hours            task's hours.
- * @apiSuccess {String}    task.minutes          task's minutes.
- * @apiSuccess {String}    task.seconds          task's seconds.
+ * @apiSuccess {Number}    task.duration         task's duration.
  * @apiSuccess {Object}    task.status           task's status.
  * @apiSuccess {Sting}     task.status.status    status' description.
  * @apiSuccess {Sting}     task.status.abr       status' abr.
+ * @apiSuccess {String}    task.dhours           task's duration hours.
+ * @apiSuccess {String}    task.dminutes         task's duration minutes.
+ * @apiSuccess {String}    task.dseconds         task's duration seconds.
+ * @apiSuccess {String}    task.chours           task's current hours.
+ * @apiSuccess {String}    task.cminutes         task's current minutes.
+ * @apiSuccess {String}    task.cseconds         task's current seconds.
  * 
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
@@ -144,25 +151,28 @@ app.post('/api/users/add', async (req, res) => {
  *          "ok":true,
  *          "tasks":[
  *              {
- *                  "startDate":"2019-09-08T03:27:02.000Z",
- *                  "_id":"id",
- *                  "name":"task1",
- *                  "hours":1,
- *                  "minutes":1,
- *                  "seconds":1,
- *                  "status":{
- *                      "_id":"id",
+ *                  "current_time":0
+ *                  ,"startDate":"2019-09-08T18:46:27.000Z",
+ *                  "_id":"5d754ca02ebb7a406b598d6a",
+ *                  "name":"task",
+ *                  "duration":3661000,
+ *                  "status":
+ *                  {
  *                      "status":"active",
  *                      "abr":"A"
  *                  },
- *                  "user":"5d7431312c699b18b4211b68",
- *                  "__v":0
+ *                  "dhours":1,
+ *                  "dminutes":1,
+ *                  "dseconds":1,
+ *                  "chours":0,
+ *                  "cminutes":0,
+ *                  "cseconds":0
  *              }
  *          ]
  *     }
  *
  * 
- * @apiError (Error 4XX) ValidationError  
+ * @apiError (Error 4XX) ValidationError  Error with all validation messages
  * @apiErrorExample Response (example):
  *     HTTP/1.1 400 Bad Request
  *     {
