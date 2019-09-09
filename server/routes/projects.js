@@ -176,25 +176,34 @@ app.post('/api/project/add', async (req, res) => {
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *         "ok": true,
- *         "projects": [
- *             {
- *                 "created_date": "2019-09-09T01:34:39.370Z",
- *                 "_id": "5d75ac9597bf00560118e32c",
- *                 "name": "project2",
- *                 "user": "5d75350e24d7433e90fa23e0",
- *                 "__v": 0,
- *                 "time_project": 7322000,
- *                 "current_time": 363725,
- *                 "users": [
- *                     {
- *                         "username": "sj2",
- *                         "current_time": 363725
- *                     }
- *                 ]
- *             }
- *         ]
- *     }
+ *        "ok": true,
+ *        "projects": [        
+ *            {
+ *                "created_date": "2019-09-09T01:34:39.370Z",
+ *                "_id": "5d75ac9597bf00560118e32c",
+ *                "name": "project2",
+ *                "user": "5d75350e24d7433e90fa23e0",
+ *                "__v": 0,
+ *                "time_project": 7322000,
+ *                "time_project_h": 2,
+ *                "time_project_m": 2,
+ *                "time_project_s": 2,
+ *                "current_time": 363725,
+ *                "current_time_h": 0,
+ *                "current_time_m": 6,
+ *                "current_time_s": 3,
+ *                "users": [
+ *                    {
+ *                        "username": "sj2",
+ *                        "current_time": 363725,
+ *                        "current_time_h": 0,
+ *                        "current_time_m": 6,
+ *                        "current_time_s": 3
+ *                    }
+ *                ]
+ *            }
+ *        ]
+ *    }
  *
  * 
  * @apiError (Error 4XX) ValidationError  
@@ -235,7 +244,7 @@ app.get('/api/project/list', async (req, res) => {
             }).map((usr) => {
                 let current_time = temp_task.filter(task => task.user.username == usr)
                     .reduce((sum, val) => (sum + val.current_time), 0);
-                let t_current = Utils.milisecondsToTime(time_project);
+                let t_current = Utils.milisecondsToTime(current_time);
                 return {
                     username: usr,
                     current_time,
@@ -245,7 +254,7 @@ app.get('/api/project/list', async (req, res) => {
                 }
             });
             let t_project = Utils.milisecondsToTime(time_project);
-            let t_current = Utils.milisecondsToTime(time_project);
+            let t_current = Utils.milisecondsToTime(current_time);
 
             let data = {
                 ...project,

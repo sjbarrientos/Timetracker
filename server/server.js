@@ -20,7 +20,7 @@ app.use(express.static(__dirname + '/public'))
 app.use(require('./routes/index'));
 
 //Conect to Mongo DB
-mongoose.connect(process.env.DBString, { useNewUrlParser: true, useCreateIndex: true }, (err, res) => {
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useCreateIndex: true }, (err, res) => {
     if (err)
         throw err
     console.log('Database connected susscessfuly');
@@ -30,4 +30,6 @@ mongoose.connect(process.env.DBString, { useNewUrlParser: true, useCreateIndex: 
 // require('./models/user');
 // require('./models/task');
 //Start server
-app.listen(process.env.PORT, () => console.log(`Time Tracker Api running at port ${process.env.PORT}`));
+server = app.listen(process.env.PORT, () => console.log(`Time Tracker Api running at port ${process.env.PORT}`));
+
+module.exports = server;
