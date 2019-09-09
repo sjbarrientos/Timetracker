@@ -19,4 +19,10 @@ let projectSchema = new Schema({
     }
 });
 
+projectSchema.methods.toJSON = function () {
+    let project = this.toObject();
+    delete project.__v;
+    return project
+}
+
 module.exports = mongoose.model('project', projectSchema);

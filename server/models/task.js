@@ -39,19 +39,19 @@ let taskSchema = new Schema({
 });
 taskSchema.methods.toJSON = function () {
     let task = this.toObject();
+
     let time = Utils.milisecondsToTime(task.duration);
     task.dhours = time.h;
     task.dminutes = time.m;
     task.dseconds = time.s;
-    console.log(task);
 
     time = Utils.milisecondsToTime(task.current_time);
     task.chours = time.h;
     task.cminutes = time.m;
     task.cseconds = time.s;
-    delete task.user;
     delete task.__v;
     delete task.status._id;
+
     return task
 }
 module.exports = mongoose.model('task', taskSchema);

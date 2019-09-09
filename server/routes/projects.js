@@ -3,8 +3,11 @@ const app = express();
 
 const httpStatus = require('http-status-codes');
 
+
 const Project = require('../models/project');
+const Task = require('../models/task');
 const TaskUtils = require('../utils/task.utils');
+const Utils = require('../utils/utils');
 
 /**
  * @api {post} /api/project/add Create new Project
@@ -92,26 +95,24 @@ const TaskUtils = require('../utils/task.utils');
  */
 app.post('/api/project/add', async (req, res) => {
     try {
+
         let body = req.body;
         let project = new Project({
             name: body.name,
             user: body.user_id
         });
-
-        let projectDB = await project.save();
         let tasks = [];
         let errors = [];
         let arrTask = body.tasks.split(',');
 
-        let projectObj = projectDB.toObject();
-        delete projectObj.user;
-        delete projectObj.__v;
+        let projectDB = (await project.save()).toObject();
+        delete projectDB.user;
 
         for (let i = 0; i < arrTask.length; i++) {
             let task_id = arrTask[i];
 
             let data = {
-                project: projectObj._id
+                project: projectDB._id
             };
             try {
                 let task = await TaskUtils.updateTask(task_id, null, data);
@@ -126,9 +127,10 @@ app.post('/api/project/add', async (req, res) => {
                 });
             }
         }
+
         res.json({
             ok: true,
-            project: projectObj,
+            project: projectDB,
             tasks,
             errors
         });
@@ -140,6 +142,138 @@ app.post('/api/project/add', async (req, res) => {
         });
     }
 
+
+});
+/**
+ * @api {post} /api/project/list List all projects
+ * @apiVersion 1.0.0
+ * @apiGroup Project
+ *
+ * @apiDescription return all projects with information about project's time, project's working time, users and working time by user
+ * 
+ *  
+ * @apiSuccess {Boolean}      ok                             status
+ * @apiSuccess {Object[]}     project                        project's list 
+ * @apiSuccess {String}       project._id                    project id.
+ * @apiSuccess {String}       project.name                   project name.
+ * @apiSuccess {Date}         project.created_date           project start date.
+ * @apiSuccess {Number}       project.time_project           project's time
+ * @apiSuccess {Number}       project.time_project_h         project's time in hours.
+ * @apiSuccess {Number}       project.time_project_m         project's time in minutes.
+ * @apiSuccess {Number}       project.time_project_s         project's time in seconds.
+ * @apiSuccess {Number}       project.current_time           project's working time.
+ * @apiSuccess {Number}       project.current_time_h         project's working time in hours.
+ * @apiSuccess {Number}       project.current_time_m         project's working time in minutes.
+ * @apiSuccess {Number}       project.current_time_s         project's working time in seconds.
+ * @apiSuccess {Object[]}     project.users                  project users.
+ * @apiSuccess {Sting}        project.users.username         username.
+ * @apiSuccess {Sting}        project.users.current_time     user's working time. 
+ * @apiSuccess {Number}       project.users.current_time_h         user's working time in hours.
+ * @apiSuccess {Number}       project.users.current_time_m         user's working time in minutes.
+ * @apiSuccess {Number}       project.users.current_time_s         user's working time in seconds.
+ * 
+ * 
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *         "ok": true,
+ *         "projects": [
+ *             {
+ *                 "created_date": "2019-09-09T01:34:39.370Z",
+ *                 "_id": "5d75ac9597bf00560118e32c",
+ *                 "name": "project2",
+ *                 "user": "5d75350e24d7433e90fa23e0",
+ *                 "__v": 0,
+ *                 "time_project": 7322000,
+ *                 "current_time": 363725,
+ *                 "users": [
+ *                     {
+ *                         "username": "sj2",
+ *                         "current_time": 363725
+ *                     }
+ *                 ]
+ *             }
+ *         ]
+ *     }
+ *
+ * 
+ * @apiError (Error 4XX) ValidationError  
+ * @apiErrorExample Response (example):
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *          "ok":false,
+ *          "err":"ValidationError",
+ *          "message":"Task validation failed: hours: hours is required"
+ *     }
+ */
+app.get('/api/project/list', async (req, res) => {
+    try {
+
+        let projects = await Project.find({}).sort('_id');
+        let tasks = await Task.find({}).populate('user').sort('poject');
+
+        for (let i = 0; i < projects.length; i++) {
+
+            let project = projects[i].toObject();
+            let p = String(project._id);
+
+            let temp_task = tasks.filter(task => task.project == p);
+
+            let time_project = temp_task.reduce((sum, val) => (sum + val.duration), 0);
+            let current_time = temp_task.reduce((sum, val) => (sum + val.current_time), 0);
+
+            let users = temp_task.map((task) => {
+                return task.user.username
+            }).filter((user, index, arr_users) => {
+                let indexUsr = arr_users.indexOf(user);
+
+                if (index === indexUsr) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }).map((usr) => {
+                let current_time = temp_task.filter(task => task.user.username == usr)
+                    .reduce((sum, val) => (sum + val.current_time), 0);
+                let t_current = Utils.milisecondsToTime(time_project);
+                return {
+                    username: usr,
+                    current_time,
+                    current_time_h: t_current.h,
+                    current_time_m: t_current.m,
+                    current_time_s: t_current.s,
+                }
+            });
+            let t_project = Utils.milisecondsToTime(time_project);
+            let t_current = Utils.milisecondsToTime(time_project);
+
+            let data = {
+                ...project,
+                time_project,
+                time_project_h: t_project.h,
+                time_project_m: t_project.m,
+                time_project_s: t_project.s,
+                current_time,
+                current_time_h: t_current.h,
+                current_time_m: t_current.m,
+                current_time_s: t_current.s,
+                users
+            }
+            projects[i] = data;
+
+        }
+
+        return res.json({
+            ok: true,
+            projects
+        });
+    } catch (err) {
+        return res.status(httpStatus.BAD_REQUEST).json({
+            ok: false,
+            err: err.name,
+            message: err.message
+        });
+    }
 
 });
 
